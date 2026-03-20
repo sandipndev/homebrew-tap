@@ -1,0 +1,78 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+
+jobs:
+  update:
+    name: Update vex formula
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update formula
+        run: |
+          version="${{ github.event.client_payload.version }}"
+          base_url="https://github.com/sandipndev/vex/releases/download/v${version}"
+
+          echo "Updating vex formula to v${version}"
+
+          sha_x86_darwin=$(curl -sL "${base_url}/vex-x86_64-darwin.tar.gz" | sha256sum | cut -d' ' -f1)
+          sha_arm_darwin=$(curl -sL "${base_url}/vex-aarch64-darwin.tar.gz" | sha256sum | cut -d' ' -f1)
+          sha_x86_linux=$(curl -sL "${base_url}/vex-x86_64-linux.tar.gz" | sha256sum | cut -d' ' -f1)
+          sha_arm_linux=$(curl -sL "${base_url}/vex-aarch64-linux.tar.gz" | sha256sum | cut -d' ' -f1)
+
+          cat > Formula/vex.rb << 'FORMULA'
+          class Vex < Formula
+            desc "AI-native version control workflow engine"
+            homepage "https://github.com/sandipndev/vex"
+            version "VERSION_PLACEHOLDER"
+            license "AGPL-3.0"
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-aarch64-darwin.tar.gz"
+                sha256 "SHA_ARM_DARWIN"
+              else
+                url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-x86_64-darwin.tar.gz"
+                sha256 "SHA_X86_DARWIN"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-aarch64-linux.tar.gz"
+                sha256 "SHA_ARM_LINUX"
+              else
+                url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-x86_64-linux.tar.gz"
+                sha256 "SHA_X86_LINUX"
+              end
+            end
+
+            def install
+              bin.install "vex"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/vex --version")
+            end
+          end
+          FORMULA
+
+          sed -i 's/^          //' Formula/vex.rb
+          sed -i "s/VERSION_PLACEHOLDER/${version}/" Formula/vex.rb
+          sed -i "s/SHA_X86_DARWIN/${sha_x86_darwin}/" Formula/vex.rb
+          sed -i "s/SHA_ARM_DARWIN/${sha_arm_darwin}/" Formula/vex.rb
+          sed -i "s/SHA_X86_LINUX/${sha_x86_linux}/" Formula/vex.rb
+          sed -i "s/SHA_ARM_LINUX/${sha_arm_linux}/" Formula/vex.rb
+
+      - name: Commit and push
+        run: |
+          version="${{ github.event.client_payload.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/vex.rb
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "feat: update vex to v${version}"
+          git push origin main
