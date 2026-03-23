@@ -1,26 +1,26 @@
 class Vex < Formula
   desc "AI-native version control workflow engine"
   homepage "https://github.com/sandipndev/vex"
-  version "0.7.12"
+  version "0.7.13"
   license "AGPL-3.0"
 
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-aarch64-darwin.tar.gz"
-      sha256 "3a70cd4d18d738178c4cb77552d903e71e86525e56447853fe7ab3ec65bc89f6"
+      sha256 "1682668eb1d75d74f0b0a95769c2cf3f75e86119942bd8ee6a15bbc090f11480"
     else
       url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-x86_64-darwin.tar.gz"
-      sha256 "8d09d740797d285cb7c06b9c2e4409e1bcc011a0aa1898e8748758d3d0f6715b"
+      sha256 "8719243b29b96f39f37ac9dcc1caf8f0bc726aee442a827ffc8d64970523ee13"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
       url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-aarch64-linux.tar.gz"
-      sha256 "26fd1e856e5048d82cb371a8455bb53d3ae8bad1f1013541fda2feeef20366c5"
+      sha256 "feb5e24917a23d1e1df03c029698bef36d3b57efc76f5821fe0585fd97f2f311"
     else
       url "https://github.com/sandipndev/vex/releases/download/v#{version}/vex-x86_64-linux.tar.gz"
-      sha256 "2bc411d38220c318db4e73eeda572a65b496de9fbc42ab28041213feec44f237"
+      sha256 "db1272ded8abda03a6f7e3ec9a7c1b226cc9aabb1c15f8c203d3e5846f28d388"
     end
   end
 
